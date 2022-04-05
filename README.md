@@ -8,6 +8,8 @@ VRF consists of multiple smart contracts and libraries working together. The fig
 
 ![band-overview](https://user-images.githubusercontent.com/12705423/127653518-2b4c43bd-0834-4b5e-903d-ce71db7ccf67.png)
 
+![overview-2](https://user-images.githubusercontent.com/12705423/161716790-8696406a-af8d-422b-8ff4-5092cae4d0e1.png)
+
 ## Contracts
 
 #### Libraries
