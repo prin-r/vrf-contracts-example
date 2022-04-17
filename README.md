@@ -53,3 +53,11 @@ The figures below illustrates the interaction of each actor
 2. The bounty hunter pick up an event emitted by the previous step. After that, the bounty hunter creates a request according to the event's params on Band's chain in order to retrieve the random data with proof from Band and then send it to the `VRFProvider` contract on Ethereum.
 
 ![step2](https://user-images.githubusercontent.com/12705423/127733734-5b0c79bc-4c09-43f8-9708-9d9075f3bbe6.png)
+
+
+## Deployed contracts
+
+#### kovan
+- [Bridge](https://kovan.etherscan.io/address/0x642cd4fcf9dc189feda8929836210b88a21bdf2e#code)
+- [VRFProvider](https://kovan.etherscan.io/address/0x5be99a1fa9bff3b06f610594e9fdd0ab65eb93d6#code)
+
