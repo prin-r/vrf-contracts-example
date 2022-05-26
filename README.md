@@ -16,9 +16,9 @@ VRF consists of multiple smart contracts and libraries working together. The fig
 
 | Contract Name   |      Address (testnet)     |
 |----------|:-------------:|
-| Bridge |  [0x6f057CE91CFcB59d839Db91e8DF067278a704cb8](https://testnet.explorer.emerald.oasis.dev/address/0x6f057CE91CFcB59d839Db91e8DF067278a704cb8/transactions) |
-| VRF Provider |   [0xF1F3554b6f46D8f172c89836FBeD1ea8551eabad](https://testnet.explorer.emerald.oasis.dev/address/0xF1F3554b6f46D8f172c89836FBeD1ea8551eabad/transactions)   |
-| Mock VRF Consumer | [0xE2f7Cf77DF70af8e92FF69B8Ffc92585C307a358](https://testnet.explorer.emerald.oasis.dev/address/0xE2f7Cf77DF70af8e92FF69B8Ffc92585C307a358/transactions) |
+| Bridge |  [0x826f5bAFeAcd300A28cA2c2E007C08fDf46eb9A1](https://testnet.explorer.emerald.oasis.dev/address/0x826f5bAFeAcd300A28cA2c2E007C08fDf46eb9A1/transactions) |
+| VRF Provider |   [0xFe92D326e53791f3a6DD319f8885414eE15312Eb](https://testnet.explorer.emerald.oasis.dev/address/0xFe92D326e53791f3a6DD319f8885414eE15312Eb/transactions)   |
+| Mock VRF Consumer | [0xB77BbdB85e1F972Eb5a4459776F6D56BCAbdFea9](https://testnet.explorer.emerald.oasis.dev/address/0xB77BbdB85e1F972Eb5a4459776F6D56BCAbdFea9/transactions) |
 
 #### Libraries
 
@@ -67,11 +67,11 @@ The figures below illustrates the interaction of each actor
 
 ```shell
 requestRandomData (Oasis)
-https://testnet.explorer.emerald.oasis.dev/tx/0x4556e082494d6337b2d4d0bd0df24be8ce41bd97c9ca41a9717a60d25c59d24b/logs
+https://testnet.explorer.emerald.oasis.dev/tx/0x482acbd1021cb3652badd613e3a5d0f3c8c7268ab4dcdd7ebaef256ff49bdc68/logs
 
 request (Band)
-https://laozi-testnet4.cosmoscan.io/request/4213063
+https://laozi-testnet4.cosmoscan.io/request/4597469
 
 relayProof (Oasis)
-https://testnet.explorer.emerald.oasis.dev/tx/0xcb580f31662fe7a35e9f7d19880f38ce977737ac6c6f2a3eb01a84924a118d2a/logs
+https://testnet.explorer.emerald.oasis.dev/tx/0x30fbf7306469acc3966e5797b0ffd1fe5b585314bf6b57cbd7de4246a6a98d0a/logs
 ```
