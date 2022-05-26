@@ -43,7 +43,7 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         string seed,
         uint64 time,
         uint64 bandRequestID,
-        bytes32 result
+        bytes32 resultHash
     );
 
     struct Task {
@@ -52,7 +52,8 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         uint64 time;
         uint256 bounty;
         bool isResolved;
-        bytes32 result;
+        bytes result;
+        bytes proof;
     }
 
     constructor(
@@ -185,7 +186,7 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         require(!task.isResolved, "Task already resolved");
 
         VRFDecoder.Result memory result = res.result.decodeResult();
-        bytes32 resultHash = keccak256(result.hash);
+        bytes32 resultHash = keccak256(result.result);
 
         // End function by call consume function on VRF consumer with data from BandChain
         if (task.caller.isContract()) {
@@ -197,7 +198,8 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         }
 
         // Save result and mark resolve to this task
-        task.result = resultHash;
+        task.result = result.result;
+        task.proof = result.proof;
         task.isResolved = true;
         payable(msg.sender).transfer(task.bounty);
         emit RandomDataRelayed(

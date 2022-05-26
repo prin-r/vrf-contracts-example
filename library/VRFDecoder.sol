@@ -16,7 +16,8 @@ library VRFDecoder {
     }
 
     struct Result {
-        bytes hash;
+        bytes result;
+        bytes proof;
     }
 
     /// @notice Decodes the encoded request input parameters
@@ -40,7 +41,8 @@ library VRFDecoder {
         returns (Result memory result)
     {
         Obi.Data memory decoder = Obi.from(encodedResult);
-        result.hash = decoder.decodeBytes();
+        result.result = decoder.decodeBytes();
+        result.proof = decoder.decodeBytes();
         require(decoder.finished(), "DATA_DECODE_NOT_FINISHED");
     }
 }
