@@ -12,6 +12,14 @@ VRF consists of multiple smart contracts and libraries working together. The fig
 
 ## Contracts
 
+#### Deployed contracts
+
+| Contract Name   |      Address (testnet)     |
+|----------|:-------------:|
+| Bridge |  [0x6f057CE91CFcB59d839Db91e8DF067278a704cb8](https://testnet.explorer.emerald.oasis.dev/address/0x6f057CE91CFcB59d839Db91e8DF067278a704cb8/transactions) |
+| VRF Provider |   [0xF1F3554b6f46D8f172c89836FBeD1ea8551eabad](https://testnet.explorer.emerald.oasis.dev/address/0xF1F3554b6f46D8f172c89836FBeD1ea8551eabad/transactions)   |
+| Mock VRF Consumer | [0xE2f7Cf77DF70af8e92FF69B8Ffc92585C307a358](https://testnet.explorer.emerald.oasis.dev/address/0xE2f7Cf77DF70af8e92FF69B8Ffc92585C307a358/transactions) |
+
 #### Libraries
 
 - [Address](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol) - A collection of functions related to the address type. In our case, only `isContract(address account)`(returns true if an account is a contract) function is used.
@@ -55,10 +63,15 @@ The figures below illustrates the interaction of each actor
 ![step2](https://user-images.githubusercontent.com/12705423/127733734-5b0c79bc-4c09-43f8-9708-9d9075f3bbe6.png)
 
 
-## Deployed contracts
+## Example results from testing
 
-#### kovan
-- [Bridge](https://kovan.etherscan.io/address/0x642cd4fcf9dc189feda8929836210b88a21bdf2e#code)
-- [VRFProvider](https://kovan.etherscan.io/address/0x5be99a1fa9bff3b06f610594e9fdd0ab65eb93d6#code)
-- [VRFConsumer](https://kovan.etherscan.io/address/0x8a53f19Ac27094F0f46D1e9a24c0C83D7C37181E#code)
+```shell
+requestRandomData (Oasis)
+https://testnet.explorer.emerald.oasis.dev/tx/0x4556e082494d6337b2d4d0bd0df24be8ce41bd97c9ca41a9717a60d25c59d24b/logs
 
+request (Band)
+https://laozi-testnet4.cosmoscan.io/request/4213063
+
+relayProof (Oasis)
+https://testnet.explorer.emerald.oasis.dev/tx/0xcb580f31662fe7a35e9f7d19880f38ce977737ac6c6f2a3eb01a84924a118d2a/logs
+```
