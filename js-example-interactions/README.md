@@ -1,6 +1,17 @@
 # Javascript Example Interaction
 
-This folder contain an example of using js to interact with VRF system.
+This folder contain an example of using a js program as an off-chain service to interact with VRF system.
+
+## Flow
+
+1. (Oasis) The consumer contract makes a request call to the vrf-provider contract.
+2. (Oasis) The vrf-provider contract will create a task that is specific to the request and emit an event.
+3. (Off-chain) An off-chain service will pick up the event and then make a request tx on Bandchain.
+4. (Bandchain) After the request has been made, the validators will report the VRF's result with the proof to fulfill the request.
+5. (Off-chain) An off-chain service will pick up the result with proof from Bandchain and then make a relay tx to the vrf-provider contract.
+6. (Oasis) After sending a relay tx the vrf-provider contract will extract the result and then callback to the consumer contract with the final result.
+
+## Installation
 
 using node v16.15.0
 
