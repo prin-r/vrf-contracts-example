@@ -24,6 +24,7 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
     uint64 public askCount;
 
     uint256 public taskNonce;
+    uint256 public minimumFee;
 
     mapping(address => mapping(string => bool)) public hasClientSeed;
     mapping(string => Task) public tasks;
@@ -35,7 +36,7 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         string seed,
         uint64 time,
         bytes32 blockHash,
-        uint256 bounty
+        uint256 taskFee
     );
     event RandomDataRelayed(
         address to,
@@ -43,28 +44,31 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         string seed,
         uint64 time,
         uint64 bandRequestID,
-        bytes32 result
+        bytes32 resultHash
     );
 
     struct Task {
         address caller;
         string clientSeed;
         uint64 time;
-        uint256 bounty;
+        uint256 taskFee;
         bool isResolved;
-        bytes32 result;
+        bytes result;
+        bytes proof;
     }
 
     constructor(
         IBridge _bridge,
         uint64 _oracleScriptID,
         uint64 _minCount,
-        uint64 _askCount
+        uint64 _askCount,
+        uint256 _minimumFee
     ) {
         bridge = _bridge;
         oracleScriptID = _oracleScriptID;
         minCount = _minCount;
         askCount = _askCount;
+        minimumFee = _minimumFee;
     }
 
     function b32ToHexString(bytes32 x) public pure returns (string memory) {
@@ -123,6 +127,10 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         askCount = _askCount;
     }
 
+    function setMinimumFee(uint256 _minimumFee) external onlyOwner {
+        minimumFee = _minimumFee;
+    }
+
     function requestRandomData(string calldata clientSeed)
         external
         payable
@@ -145,9 +153,11 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
 
         Task storage task = tasks[seed];
         task.caller = msg.sender;
-        task.bounty = msg.value;
+        task.taskFee = msg.value;
         task.time = time;
         task.clientSeed = clientSeed;
+
+        require(task.taskFee >= minimumFee, "Task fee is lower than the minimum fee");
 
         emit RandomDataRequested(
             taskNonce,
@@ -179,13 +189,14 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         );
 
         VRFDecoder.Params memory params = res.params.decodeParams();
+        require(msg.sender == params.taskWorker, "THE_SENDER_MUST_BE_THE_TASK_WORKER");
 
         Task storage task = tasks[params.seed];
         require(task.caller != address(0), "Task not found");
         require(!task.isResolved, "Task already resolved");
 
         VRFDecoder.Result memory result = res.result.decodeResult();
-        bytes32 resultHash = keccak256(result.hash);
+        bytes32 resultHash = keccak256(result.result);
 
         // End function by call consume function on VRF consumer with data from BandChain
         if (task.caller.isContract()) {
@@ -197,9 +208,10 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         }
 
         // Save result and mark resolve to this task
-        task.result = resultHash;
+        task.result = result.result;
+        task.proof = result.proof;
         task.isResolved = true;
-        payable(msg.sender).transfer(task.bounty);
+        payable(msg.sender).transfer(task.taskFee);
         emit RandomDataRelayed(
             task.caller,
             task.clientSeed,
