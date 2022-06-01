@@ -59,6 +59,7 @@ The figures below illustrates the interaction of each actor
 
 #### kovan
 - [Bridge](https://kovan.etherscan.io/address/0x642cd4fcf9dc189feda8929836210b88a21bdf2e#code)
+- [Experimental Bridge](https://kovan.etherscan.io/address/0x1c6637c781df2ddDD84546e5E7C39c88B9d1DB11#code)
 - [VRFProvider](https://kovan.etherscan.io/address/0x5be99a1fa9bff3b06f610594e9fdd0ab65eb93d6#code)
 - [VRFConsumer](https://kovan.etherscan.io/address/0x8a53f19Ac27094F0f46D1e9a24c0C83D7C37181E#code)
 
