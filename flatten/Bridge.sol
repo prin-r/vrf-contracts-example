@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at kovan-optimistic.etherscan.io on 2022-05-26
-*/
-
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.10;
@@ -1579,37 +1575,52 @@ contract Bridge is IBridge, Ownable {
 
     /// Mapping from block height to the struct that contains block time and hash of "oracle" iAVL Merkle tree.
     mapping(uint256 => BlockDetail) public blockDetails;
-    /// Mapping from an address to its voting power.
-    mapping(address => uint256) public validatorPowers;
+    /// Mapping from an index to a validator with its voting power.
+    mapping(uint256 => ValidatorWithPower) public validatorPowers;
+    /// The Number of the total validators.
+    uint256 public validatorsCount;
     /// The total voting power of active validators currently on duty.
     uint256 public totalValidatorPower;
 
     /// Initializes an oracle bridge to BandChain.
     /// @param validators The initial set of BandChain active validators.
     constructor(ValidatorWithPower[] memory validators) {
-        for (uint256 idx = 0; idx < validators.length; ++idx) {
-            ValidatorWithPower memory validator = validators[idx];
-            require(
-                validatorPowers[validator.addr] == 0,
-                "DUPLICATION_IN_INITIAL_VALIDATOR_SET"
-            );
-            validatorPowers[validator.addr] = validator.power;
-            totalValidatorPower += validator.power;
+        _setValidatorPowers(validators);
+    }
+
+    /// Update validator powers by owner.
+    /// @param validators The changed set of BandChain validators.
+    function _setValidatorPowers(ValidatorWithPower[] memory validators)
+        private
+    {
+        validatorsCount = validators.length;
+        address lastValidator = address(0);
+        for (uint256 idx = 0; idx < validatorsCount; ++idx) {
+            require(validators[idx].addr > lastValidator, "INVALID_VALIDATOR_ORDER");
+
+            validatorPowers[idx] = validators[idx];
+            totalValidatorPower += validators[idx].power;
+
+            lastValidator = validators[idx].addr;
         }
     }
 
     /// Update validator powers by owner.
     /// @param validators The changed set of BandChain validators.
-    function updateValidatorPowers(ValidatorWithPower[] calldata validators)
+    function setValidatorPowers(ValidatorWithPower[] calldata validators)
         external
         onlyOwner
     {
-        for (uint256 idx = 0; idx < validators.length; ++idx) {
-            ValidatorWithPower memory validator = validators[idx];
-            totalValidatorPower -= validatorPowers[validator.addr];
-            validatorPowers[validator.addr] = validator.power;
-            totalValidatorPower += validator.power;
+        _setValidatorPowers(validators);
+    }
+
+    /// Get validators with power
+    function getAllValidatorsWithPower() external view returns(ValidatorWithPower[] memory) {
+        ValidatorWithPower[] memory valps = new ValidatorWithPower[](validatorsCount);
+        for (uint256 idx = 0; idx < validatorsCount; ++idx) {
+            valps[idx] = validatorPowers[idx];
         }
+        return valps;
     }
 
     /// Relays a detail of Bandchain block to the bridge contract.
@@ -1629,15 +1640,32 @@ contract Bridge is IBridge, Ownable {
 
         // Computes Tendermint's block header hash at this given block.
         bytes32 blockHeader = merkleParts.getBlockHeader(multiStore.getAppHash());
+
         // Counts the total number of valid signatures signed by active validators.
         address lastSigner = address(0);
-        uint256 sumVotingPower = 0;
-        for (uint256 idx = 0; idx < signatures.length; ++idx) {
-            address signer = signatures[idx].recoverSigner(blockHeader);
-            require(signer > lastSigner, "INVALID_SIGNATURE_SIGNER_ORDER");
-            sumVotingPower += validatorPowers[signer];
-            lastSigner = signer;
+        address[] memory signers = new address[](signatures.length);
+        for (uint256 idx = 0; idx < signers.length; idx++) {
+            signers[idx] = signatures[idx].recoverSigner(blockHeader);
+            require(signers[idx] > lastSigner, "INVALID_SIGNATURE_SIGNER_ORDER");
+            lastSigner = signers[idx];
         }
+
+        // Match each signer with each validator to accumulate the total voting power.
+        uint256 sumVotingPower = 0;
+        for ((uint256 idx, uint256 jdx) = (0, 0); idx < signers.length && jdx < validatorsCount;) {
+            address validatorAddress = validatorPowers[jdx].addr;
+            address signer = signers[idx];
+            if (signer == validatorAddress) {
+                sumVotingPower += validatorPowers[jdx].power;
+                idx++;
+                jdx++;
+            } else if (signer < validatorAddress) {
+                idx++;
+            } else {
+                jdx++;
+            }
+        }
+
         // Verifies that sufficient validators signed the block and saves the oracle state.
         require(
             sumVotingPower * 3 > totalValidatorPower * 2,
