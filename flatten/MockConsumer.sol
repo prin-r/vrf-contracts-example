@@ -1,9 +1,3 @@
-/**
- *Submitted for verification at kovan-optimistic.etherscan.io on 2022-05-26
-*/
-
-// SPDX-License-Identifier: Apache-2.0
-
 pragma solidity 0.8.10;
 pragma abicoder v2;
 

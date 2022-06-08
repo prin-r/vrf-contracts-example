@@ -1,5 +1,5 @@
 /**
- *Submitted for verification at kovan-optimistic.etherscan.io on 2022-05-26
+ *Submitted for verification at Etherscan.io on 2022-06-07
 */
 
 // SPDX-License-Identifier: Apache-2.0
@@ -390,6 +390,49 @@ abstract contract Ownable is Context {
     }
 }
 
+abstract contract ReentrancyGuard {
+    // Booleans are more expensive than uint256 or any type that takes up a full
+    // word because each write operation emits an extra SLOAD to first read the
+    // slot's contents, replace the bits taken up by the boolean, and then write
+    // back. This is the compiler's defense against contract upgrades and
+    // pointer aliasing, and it cannot be disabled.
+
+    // The values being non-zero value makes deployment a bit more expensive,
+    // but in exchange the refund on every call to nonReentrant will be lower in
+    // amount. Since refunds are capped to a percentage of the total
+    // transaction's gas, it is best to keep them low in cases like this one, to
+    // increase the likelihood of the full refund coming into effect.
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+
+    uint256 private _status;
+
+    constructor() {
+        _status = _NOT_ENTERED;
+    }
+
+    /**
+     * @dev Prevents a contract from calling itself, directly or indirectly.
+     * Calling a `nonReentrant` function from another `nonReentrant`
+     * function is not supported. It is possible to prevent this from happening
+     * by making the `nonReentrant` function external, and making it call a
+     * `private` function that does the actual work.
+     */
+    modifier nonReentrant() {
+        // On the first call to nonReentrant, _notEntered will be true
+        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+
+        // Any calls to nonReentrant after this point will fail
+        _status = _ENTERED;
+
+        _;
+
+        // By storing the original value once again, a refund is triggered (see
+        // https://eips.ethereum.org/EIPS/eip-2200)
+        _status = _NOT_ENTERED;
+    }
+}
+
 interface IBridge {
     enum ResolveStatus {
         RESOLVE_STATUS_OPEN_UNSPECIFIED,
@@ -638,6 +681,13 @@ library VRFDecoder {
         bytes proof;
     }
 
+    function bytesToAddress(bytes memory addressBytes) internal pure returns(address addr) {
+        require(addressBytes.length == 20, "DATA_DECODE_INVALID_SIZE_FOR_ADDRESS");
+        assembly {
+            addr := mload(add(addressBytes, 20))
+        }
+    }
+
     /// @notice Decodes the encoded request input parameters
     /// @param encodedParams Encoded paramter data
     function decodeParams(bytes memory encodedParams)
@@ -648,12 +698,7 @@ library VRFDecoder {
         Obi.Data memory decoder = Obi.from(encodedParams);
         params.seed = decoder.decodeString();
         params.time = decoder.decodeU64();
-
-        bytes memory tmp = decoder.decodeBytes();
-        require(tmp.length == 20, "DATA_DECODE_INVALID_SIZE_FOR_ADDRESS");
-        assembly {
-            params.taskWorker := mload(add(bys,20))
-        }
+        params.taskWorker = bytesToAddress(decoder.decodeBytes());
 
         require(decoder.finished(), "DATA_DECODE_NOT_FINISHED");
     }
@@ -674,7 +719,7 @@ library VRFDecoder {
 
 /// @title VRFProvider contract
 /// @notice Contract for working with BandChain's verifiable random function feature
-abstract contract VRFProviderBase is IVRFProvider, Ownable {
+abstract contract VRFProviderBase is IVRFProvider, Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using VRFDecoder for bytes;
     using Address for address;
@@ -723,13 +768,13 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         uint64 _oracleScriptID,
         uint64 _minCount,
         uint64 _askCount,
-        uint256 _taskFee
+        uint256 _minimumFee
     ) {
         bridge = _bridge;
         oracleScriptID = _oracleScriptID;
         minCount = _minCount;
         askCount = _askCount;
-        taskFee = _taskFee;
+        minimumFee = _minimumFee;
     }
 
     function b32ToHexString(bytes32 x) public pure returns (string memory) {
@@ -788,8 +833,8 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         askCount = _askCount;
     }
 
-    function setTaskFee(uint256 _taskFee) external onlyOwner {
-        taskFee = _taskFee;
+    function setMinimumFee(uint256 _minimumFee) external onlyOwner {
+        minimumFee = _minimumFee;
     }
 
     function requestRandomData(string calldata clientSeed)
@@ -834,7 +879,7 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         taskNonce = taskNonce.add(1);
     }
 
-    function relayProof(bytes calldata proof) external {
+    function relayProof(bytes calldata proof) external nonReentrant {
         IBridge.Result memory res = bridge.relayAndVerify(proof);
 
         // check oracle script id, min count, ask count
@@ -856,6 +901,10 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
         require(task.caller != address(0), "Task not found");
         require(!task.isResolved, "Task already resolved");
 
+        // Mark this task as resolved
+        task.isResolved = true;
+
+        // Get result
         VRFDecoder.Result memory result = res.result.decodeResult();
         bytes32 resultHash = keccak256(result.result);
 
@@ -868,10 +917,10 @@ abstract contract VRFProviderBase is IVRFProvider, Ownable {
             );
         }
 
-        // Save result and mark resolve to this task
+        // Save result and its proof
         task.result = result.result;
         task.proof = result.proof;
-        task.isResolved = true;
+
         payable(msg.sender).transfer(task.taskFee);
         emit RandomDataRelayed(
             task.caller,
@@ -889,6 +938,7 @@ contract VRFProvider is VRFProviderBase {
         IBridge _bridge,
         uint64 _oracleScriptID,
         uint64 _minCount,
-        uint64 _askCount
-    ) VRFProviderBase(_bridge, _oracleScriptID, _minCount, _askCount) {}
+        uint64 _askCount,
+        uint256 _minimumFee
+    ) VRFProviderBase(_bridge, _oracleScriptID, _minCount, _askCount, _minimumFee) {}
 }
