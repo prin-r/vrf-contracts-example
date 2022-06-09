@@ -13,10 +13,19 @@ library VRFDecoder {
     struct Params {
         string seed;
         uint64 time;
+        address taskWorker;
     }
 
     struct Result {
-        bytes hash;
+        bytes result;
+        bytes proof;
+    }
+
+    function bytesToAddress(bytes memory addressBytes) internal pure returns(address addr) {
+        require(addressBytes.length == 20, "DATA_DECODE_INVALID_SIZE_FOR_ADDRESS");
+        assembly {
+            addr := mload(add(addressBytes, 20))
+        }
     }
 
     /// @notice Decodes the encoded request input parameters
@@ -29,6 +38,8 @@ library VRFDecoder {
         Obi.Data memory decoder = Obi.from(encodedParams);
         params.seed = decoder.decodeString();
         params.time = decoder.decodeU64();
+        params.taskWorker = bytesToAddress(decoder.decodeBytes());
+
         require(decoder.finished(), "DATA_DECODE_NOT_FINISHED");
     }
 
@@ -40,7 +51,8 @@ library VRFDecoder {
         returns (Result memory result)
     {
         Obi.Data memory decoder = Obi.from(encodedResult);
-        result.hash = decoder.decodeBytes();
+        result.result = decoder.decodeBytes();
+        result.proof = decoder.decodeBytes();
         require(decoder.finished(), "DATA_DECODE_NOT_FINISHED");
     }
 }

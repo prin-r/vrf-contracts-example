@@ -12,6 +12,14 @@ VRF consists of multiple smart contracts and libraries working together. The fig
 
 ## Contracts
 
+#### Deployed contracts
+
+| Contract Name   |      Address (testnet)     |
+|----------|:-------------:|
+| Bridge |  [0x826f5bAFeAcd300A28cA2c2E007C08fDf46eb9A1](https://testnet.explorer.emerald.oasis.dev/address/0x826f5bAFeAcd300A28cA2c2E007C08fDf46eb9A1/transactions) |
+| VRF Provider |   [0xFe92D326e53791f3a6DD319f8885414eE15312Eb](https://testnet.explorer.emerald.oasis.dev/address/0xFe92D326e53791f3a6DD319f8885414eE15312Eb/transactions)   |
+| Mock VRF Consumer | [0xB77BbdB85e1F972Eb5a4459776F6D56BCAbdFea9](https://testnet.explorer.emerald.oasis.dev/address/0xB77BbdB85e1F972Eb5a4459776F6D56BCAbdFea9/transactions) |
+
 #### Libraries
 
 - [Address](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol) - A collection of functions related to the address type. In our case, only `isContract(address account)`(returns true if an account is a contract) function is used.
@@ -55,11 +63,15 @@ The figures below illustrates the interaction of each actor
 ![step2](https://user-images.githubusercontent.com/12705423/127733734-5b0c79bc-4c09-43f8-9708-9d9075f3bbe6.png)
 
 
-## Deployed contracts
+## Example results from testing
 
-#### kovan
-- [Bridge](https://kovan.etherscan.io/address/0x642cd4fcf9dc189feda8929836210b88a21bdf2e#code)
-- [Experimental Bridge](https://kovan.etherscan.io/address/0x1c6637c781df2ddDD84546e5E7C39c88B9d1DB11#code)
-- [VRFProvider](https://kovan.etherscan.io/address/0x5be99a1fa9bff3b06f610594e9fdd0ab65eb93d6#code)
-- [VRFConsumer](https://kovan.etherscan.io/address/0x8a53f19Ac27094F0f46D1e9a24c0C83D7C37181E#code)
+```shell
+requestRandomData (Oasis)
+https://testnet.explorer.emerald.oasis.dev/tx/0x482acbd1021cb3652badd613e3a5d0f3c8c7268ab4dcdd7ebaef256ff49bdc68/logs
 
+request (Band)
+https://laozi-testnet4.cosmoscan.io/request/4597469
+
+relayProof (Oasis)
+https://testnet.explorer.emerald.oasis.dev/tx/0x30fbf7306469acc3966e5797b0ffd1fe5b585314bf6b57cbd7de4246a6a98d0a/logs
+```
