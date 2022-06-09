@@ -206,7 +206,9 @@ const sleep = async (ms) => new Promise((r) => setTimeout(r, ms));
 // steps
 (async () => {
     let fromBlock = Number(startBlock);
-    const txMemo = {};
+    const txMemo = {
+        "0xd167a66ea6a4b82f265df544951a35fffc768351f40bddb6c13147ba0ae624d5_2": 32084025
+    };
     while (true) {
         try {
             const ceilingBlockNumber = Number((await web3.eth.getBlock('latest'))["number"]) - 1;
