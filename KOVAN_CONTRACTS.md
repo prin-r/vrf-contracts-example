@@ -42,9 +42,9 @@ The entire flow can be divided into three major steps.
 
 ## Example on the kovan and laozi-testnet4
 
-1. The [VRFConsumer]("https://kovan.etherscan.io/address/0xe616e5edf0e0a1a3e7096018ee8c5f1ee7fe4f1e") requests a random number from the [VRFProvider]("https://kovan.etherscan.io/address/0x1479437467984f3892b54480e9cd3368b7eb04c6") by sending the [transaction]("https://kovan.etherscan.io/tx/0x38934dc39edf75dfa057c327251c8e75b4f07d48bfa4f8c1ad58b5726130e89b").
-2. An off-chain service will pick up an emitted event and then make a [request]("https://laozi-testnet4.cosmoscan.io/request/5474088") on Bandchain.
-3. After the request is resolved on the Bandchain, the off-chain service will collect the proof of validity and send a relay [transaction](https://kovan.etherscan.io/tx/0x71555a0506c41c9d8d5196e3bb7467aa60dabdb16d296f44e73d0492229e4ad7) to resolve the task on Kovan.
+1. The **[VRFConsumer](https://kovan.etherscan.io/address/0xe616e5edf0e0a1a3e7096018ee8c5f1ee7fe4f1e)** requests a random number from the **[VRFProvider](https://kovan.etherscan.io/address/0x1479437467984f3892b54480e9cd3368b7eb04c6")** by sending the **[transaction]("https://kovan.etherscan.io/tx/0x38934dc39edf75dfa057c327251c8e75b4f07d48bfa4f8c1ad58b5726130e89b)**.
+2. An off-chain service will pick up an emitted event and then make a **[request](https://laozi-testnet4.cosmoscan.io/request/5474088)** on Bandchain.
+3. After the request is resolved on the Bandchain, the off-chain service will collect the proof of validity and send a relay **[transaction](https://kovan.etherscan.io/tx/0x71555a0506c41c9d8d5196e3bb7467aa60dabdb16d296f44e73d0492229e4ad7)** to resolve the task on Kovan.
 
 ## Example testcases on the testnet
 
